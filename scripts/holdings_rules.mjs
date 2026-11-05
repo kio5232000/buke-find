@@ -29,7 +29,7 @@ export function classifyCopy(copy) {
     canBorrow,
     canBorrowConfirmed: explicitEligibility || restriction,
     availableToBorrow: canBorrow && onShelf,
-    inLibraryReading: restriction && onShelf,
+    inLibraryReading: restriction && (onShelf || /展覽用書/.test(status)),
     potentiallyBorrowableButUnverified: !restriction && !explicitEligibility,
   };
 }
