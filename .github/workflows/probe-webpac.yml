@@ -1,0 +1,46 @@
+name: Probe public catalog (single ISBN)
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/probe-webpac.yml'
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Test robots and one public ISBN lookup
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          import urllib.error
+          import urllib.request
+          import urllib.robotparser
+          from html import unescape
+          ua = 'BukeFindFeasibilityCheck/1.0 (+https://github.com/kio5232000/buke-find)'
+          origin='https://lib.tnml.tn.edu.tw'
+          target=origin+'/webpac/search.cfm?m=ss&k0=9789578423763&t0=k&c0=and'
+          rp=urllib.robotparser.RobotFileParser()
+          rp.set_url(origin+'/robots.txt')
+          try:
+              rp.read()
+              print('robots fetched; allows public ISBN lookup:',rp.can_fetch(ua,target))
+          except Exception as e:
+              print('robots request failed; stopping without requesting WebPAC:',type(e).__name__,str(e)[:170]);raise SystemExit(0)
+          if not rp.can_fetch(ua,target):
+              print('robots disallows this URL; stopping');raise SystemExit(0)
+          req=urllib.request.Request(target,headers={'User-Agent':ua,'Accept':'text/html'})
+          try:
+              with urllib.request.urlopen(req,timeout=15) as resp:
+                  html=resp.read(300000).decode('utf-8','replace')
+                  print('HTTP',resp.status,'bytes received',len(html),'final URL',resp.geturl())
+                  m=re.search(r'<title[^>]*>(.*?)</title>',html,re.I|re.S)
+                  print('page title',unescape(re.sub(r'<[^>]+>','',m.group(1))).strip()[:120] if m else 'none')
+                  for word in ['館藏','預約','在架','借出','9789578423763']:
+                      print('Contains',word,word in html)
+          except Exception as e:
+              print('WebPAC fetch error',type(e).__name__,str(e)[:240])
+          PY
