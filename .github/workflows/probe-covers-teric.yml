@@ -1,0 +1,47 @@
+name: One-time cover and TERIC link probe
+on:
+  push:
+    paths: ['.github/workflows/probe-covers-teric.yml']
+  workflow_dispatch:
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Probe 4 public URLs
+        run: |
+          python - <<'PY'
+          import urllib.request,urllib.error,json,re
+          from html.parser import HTMLParser
+          urls=[
+           ('TERIC','https://teric.naer.edu.tw/wSite/PDFReader?xmlId=&fileName=1507795230326&format=pdf'),
+           ('BUKE','https://read.tn.edu.tw/Book/BookEntrance?BISBN=9789863203629'),
+           ('GOOGLE','https://www.googleapis.com/books/v1/volumes?q=isbn%3A9789863203629&maxResults=1'),
+           ('OPENLIB','https://openlibrary.org/api/books?bibkeys=ISBN%3A9789863203629&format=json&jscmd=viewapi')]
+          class P(HTMLParser):
+           def __init__(self): super().__init__();self.imgs=[]
+           def handle_starttag(self,tag,attrs):
+            if tag=='img':self.imgs.append(dict(attrs))
+          for label,url in urls:
+           print('\nPROBE',label,flush=True)
+           try:
+            req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (compatible; buke-find research)','Accept':'text/html,application/json,application/pdf'})
+            with urllib.request.urlopen(req,timeout=12) as r:
+             ct=r.headers.get('Content-Type',''); data=r.read(2500000)
+             print('STATUS',r.status,'CONTENT_TYPE',ct,'BYTES',len(data),'FINAL_URL',r.geturl(),flush=True)
+            if label=='TERIC':
+             if data[:4]==b'%PDF':
+              open('/tmp/ref.pdf','wb').write(data)
+              import subprocess
+              for args in [['pdfinfo','/tmp/ref.pdf'],['pdftotext','-f','1','-l','2','-layout','/tmp/ref.pdf','-']]:
+               try:print('PDF_OUTPUT',subprocess.check_output(args,stderr=subprocess.STDOUT,timeout=7).decode('utf-8','replace')[:1500])
+               except Exception as e:print('PDF_READ_ERROR',repr(e)[:160])
+             else:print('NOT_PDF',re.sub(r'\s+',' ',data.decode('utf-8','replace')[:750]))
+            elif label=='BUKE':
+             p=P();p.feed(data.decode('utf-8','replace'));print('IMAGE_COUNT',len(p.imgs));print('IMAGES',[x.get('src','') for x in p.imgs if x.get('src')][:18])
+            elif label=='GOOGLE':
+             j=json.loads(data);print('BOOK_MATCHES',j.get('totalItems'),[{'title':b.get('volumeInfo',{}).get('title'),'cover':b.get('volumeInfo',{}).get('imageLinks')} for b in j.get('items',[])[:1]])
+            else:
+             j=json.loads(data);print('OPEN_LIBRARY_RESPONSE',str(j)[:750])
+           except Exception as e:print('FETCH_ERROR',type(e).__name__,str(e)[:250],flush=True)
+          PY
