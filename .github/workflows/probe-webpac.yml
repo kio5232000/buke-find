@@ -16,6 +16,8 @@ jobs:
         run: |
           python - <<'PY'
           import re
+          import socket
+          socket.setdefaulttimeout(8)
           import urllib.error
           import urllib.request
           import urllib.robotparser
