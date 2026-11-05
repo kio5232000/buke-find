@@ -1,0 +1,18 @@
+name: Verify circulation status rules
+on:
+  push:
+    paths:
+      - 'scripts/holdings_rules.mjs'
+      - 'scripts/holdings_rules.test.mjs'
+      - '.github/workflows/test-holdings.yml'
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/holdings_rules.test.mjs
