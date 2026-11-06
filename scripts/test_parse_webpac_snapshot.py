@@ -29,6 +29,8 @@ class ParserTest(unittest.TestCase):
         record = parse_webpac_html(html, "9789861615929")
         self.assertEqual(record["source"], "manual-html-snapshot")
         self.assertEqual(record["reportedHoldingsCount"], 71)
+        self.assertEqual(record["currentPageNumber"], 1)
+        self.assertEqual(record["totalPagesReported"], 8)
         self.assertEqual(record["parsedPageCopyCount"], 10)
         self.assertTrue(record["paginationLikely"])
         self.assertFalse(record["complete"])
