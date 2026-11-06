@@ -1,0 +1,49 @@
+{
+  "provenance": "臺南市圖 WebPAC 公開書目頁呈現的館藏欄位（人工轉錄為測試資料；非原始 HTML、非即時資料）",
+  "sourceUrl": "https://lib.tnml.tn.edu.tw/webpac/content.cfm?at=&c0=and&current_page=1&it=&k0=9789862746530&lg=&list_num=10&lr=&m=ss&mid=1184861&mt=&pr=&py=&si=&sj=&t0=k",
+  "isbn": "9789862746530",
+  "title": "看不見也沒關係",
+  "reportedHoldingsCount": 27,
+  "rows": [
+    {
+      "barcode": "TPL0502807",
+      "homeLibrary": "新總館B1兒童區-繪本區（故事）",
+      "currentLibrary": "新總館B1兒童區-繪本區（故事）",
+      "status": "在架",
+      "dataType": "兒童書",
+      "reservationCount": 0
+    },
+    {
+      "barcode": "TC0084111",
+      "homeLibrary": "左鎮年度新書區(閉館整修)",
+      "currentLibrary": "左鎮年度新書區(閉館整修)",
+      "status": "展覽用書(可外借)",
+      "dataType": "兒童書",
+      "reservationCount": 0
+    },
+    {
+      "barcode": "ED0154075",
+      "homeLibrary": "安定兒童書區",
+      "currentLibrary": "安定兒童書區",
+      "status": "展覽用書(不外借)",
+      "dataType": "兒童書",
+      "reservationCount": 0
+    },
+    {
+      "barcode": "SS0062952",
+      "homeLibrary": "喜樹年度新書區",
+      "currentLibrary": "南區喜樹圖書館浮動館藏區",
+      "status": "借出 2026/09/27",
+      "dataType": "兒童書",
+      "reservationCount": 0
+    },
+    {
+      "barcode": "YS0204109",
+      "homeLibrary": "鹽水年度新書區(閉館整修)",
+      "currentLibrary": "鹽水年度新書區(閉館整修)",
+      "status": "在架",
+      "dataType": "兒童書",
+      "reservationCount": 0
+    }
+  ]
+}
