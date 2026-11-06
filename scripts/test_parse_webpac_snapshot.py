@@ -21,6 +21,30 @@ def page(*rows, isbn="9789861615929"):
 
 
 class ParserTest(unittest.TestCase):
+    def test_saved_actual_webpac_html_fragment(self):
+        # Extracted from a user-supplied, PUBLIC library detail-page HTML,
+        # with scripts and click handlers removed but real table DOM retained.
+        p = Path(__file__).parent / "fixtures" / "webpac_saved_real_detail.html"
+        html = p.read_text(encoding="utf-8")
+        record = parse_webpac_html(html, "9789861615929")
+        self.assertEqual(record["source"], "manual-html-snapshot")
+        self.assertEqual(record["reportedHoldingsCount"], 71)
+        self.assertEqual(record["parsedPageCopyCount"], 10)
+        self.assertTrue(record["paginationLikely"])
+        self.assertFalse(record["complete"])
+        self.assertEqual(len(record["copies"]), 10)
+        by_id = {c["barcode"]: c for c in record["copies"]}
+        self.assertEqual(by_id["KZ0162536"]["status"], "借出 2026/11/19")
+        self.assertEqual(by_id["KZ0162536"]["reservationCount"], 1)
+        self.assertEqual(by_id["TPL0487499"]["status"], "在架")
+        self.assertIsNone(by_id["TPL0487499"]["borrowable"])
+        self.assertEqual(by_id["TPL0487499"]["dataType"], "視障資料")
+        self.assertEqual(by_id["TPL0405647"]["status"], "展覽用書(不外借)")
+        self.assertIs(by_id["TPL0405647"]["borrowable"], False)
+        self.assertIsNone(by_id["NC0095700"]["borrowable"])
+        self.assertIn("閉館整修", by_id["NC0095700"]["currentLibrary"])
+
+
     def test_public_catalog_observations_reconstructed_as_table(self):
         fixture_path = Path(__file__).parent / "fixtures" / "catalog_public_observation.json"
         sample = json.loads(fixture_path.read_text(encoding="utf-8"))
