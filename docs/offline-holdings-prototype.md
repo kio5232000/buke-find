@@ -33,3 +33,12 @@ node scripts/holdings_rules.test.mjs
 - 頁面示例顯示 27 筆館藏、分 3 頁；目前測試樣本只轉錄其中 5 筆作為重現用的 HTML 表格。參考 `scripts/fixtures/catalog_public_observation.json`。
 - 解析器現在會輸出 `reportedHoldingsCount`、`parsedPageCopyCount`、`paginationLikely`，並保留 `complete=false`。沒有取得完整各頁資料就不推斷全市「只有展示本」或「全部借出」。
 - 實際 WebPAC **HTML 原始碼仍未取得**；透過網頁檢索可見的表格欄位和資料不能取代真實 DOM 結構測試。離線程式已在 GitHub Actions 通過 13 個解析測試和 17 個流通判斷測試。
+
+## 2026-11-06 上傳 HTML 的真實結構驗證成功
+收到《好忙的除夕》的實際儲存頁面後，確認書目 ID `960206`、ISBN `9789861615929`，頁面列出「館藏(71)」，第一頁實際有 10 筆館藏和 8 頁分頁。原始頁面包含表頭、`<td data-title="...">`、館藏狀態 `<span>` 及每冊預約數。
+
+- [已去除點擊處理程式的真實頁面片段](../scripts/fixtures/webpac_saved_real_detail.html)
+- [驗證案例](../scripts/test_parse_webpac_snapshot.py)：通過 ISBN、館藏 71 冊、當頁 10 筆、第一頁／八頁、展覽用書(不外借)、視障資料區在架但外借未知、閉館整修分館等檢查。
+- 真實片段中 10 筆狀態包含 7 筆借出、2 筆在架、1 筆展覽用書(不外借)。只有 1 頁，無法推論另外 61 筆的狀態。
+- 程式新增 `currentPageNumber` 與 `totalPagesReported`，便於未來在獲得資料介接許可後確認分頁是否已全部取得。
+- 這是**HTML 離線解析成功**，不是**自動連線成功**，也不代表網站已能即時顯示館藏。未登入、不蒐集個資、不爬取全站。
