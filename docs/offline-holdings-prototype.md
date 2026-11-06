@@ -9,11 +9,11 @@
 在自己有權查看的公開館藏詳細頁，於瀏覽器手動儲存 HTML 檔案。不要下載或提供包含個人借閱帳戶資訊的登入頁。
 在本機執行：
 
-\`\`\`bash
+```bash
 python scripts/parse_webpac_snapshot.py path/to/detail.html --isbn 9789861615929 --captured-at 2026-11-06T08:00:00Z --output /tmp/holdings.json
 python -m unittest discover -s scripts -p 'test_parse_webpac_snapshot.py' -v
 node scripts/holdings_rules.test.mjs
-\`\`\`
+```
 
 ## 保守的結果判斷
 - 「展覽用書(不外借)」「限館內閱覽」「參考資料區」等 → 不可外借。
