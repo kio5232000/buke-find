@@ -17,9 +17,10 @@ from pathlib import Path
 WHITESPACE = re.compile(r"\s+")
 ISBN_ON_PAGE = re.compile(r"ISBN\s*[：:]\s*([0-9Xx\-]{10,20})(?![0-9Xx])", re.I)
 NON_CIRCULATING = re.compile(
-    r"展覽用書|不外借|限館內閱覽|僅限館內|館內閱覽|參考資料區|參考書區|參考工具書|中文參考書"
+    r"不外借|限館內閱覽|僅限館內|館內閱覽|參考資料區|參考書區|參考工具書|中文參考書"
 )
 BORROWED = re.compile(r"^借出(?:\s|$|[（(])")
+EXHIBITION_BORROWABLE = re.compile(r"^展覽用書\s*[（(]\s*可外借\s*[）)]")
 HEADER_LABELS = {
     "barcode": ("條碼號", "登錄號"),
     "homeLibrary": ("典藏館", "館藏地"),
@@ -133,7 +134,7 @@ def parse_webpac_html(html: str, isbn: str, captured_at: str = "") -> dict:
             ]))
             # Borrowed is evidence of circulation; on-shelf without explicit
             # eligibility remains UNKNOWN rather than being declared borrowable.
-            eligibility = False if restriction else True if BORROWED.search(status) else None
+            eligibility = False if restriction else True if (BORROWED.search(status) or EXHIBITION_BORROWABLE.search(status)) else None
             copies.append({
                 "barcode": barcode,
                 "homeLibrary": obj.get("homeLibrary", ""),
