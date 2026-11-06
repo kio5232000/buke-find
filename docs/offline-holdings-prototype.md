@@ -27,3 +27,9 @@ node scripts/holdings_rules.test.mjs
 需要取得館方同意或官方 API／可使用的匯出方式，並驗證 HTML 實際結構。測試使用模擬 HTML 表格，能確認欄位解析程式正確，但**不能代表已通過真實線上館藏頁解析**。
 
 如果館方同意，可以使用單本、低頻率的請求驗證，再依使用條件逐步建立後端快取；取得資料後才把自動推薦接進正式網站。
+
+## 2026-11-06 實際公開頁面觀察
+- 在市圖官方 [《看不見也沒關係》書目頁](https://lib.tnml.tn.edu.tw/webpac/content.cfm?at=&c0=and&current_page=1&it=&k0=9789862746530&lg=&list_num=10&lr=&m=ss&mid=1184861&mt=&pr=&py=&si=&sj=&t0=k) 可見「展覽用書(可外借)」「展覽用書(不外借)」「在架」「借出」等不同狀態，也有分館標記「閉館整修」。**不能把所有展覽用書當成不外借。**
+- 頁面示例顯示 27 筆館藏、分 3 頁；目前測試樣本只轉錄其中 5 筆作為重現用的 HTML 表格。參考 `scripts/fixtures/catalog_public_observation.json`。
+- 解析器現在會輸出 `reportedHoldingsCount`、`parsedPageCopyCount`、`paginationLikely`，並保留 `complete=false`。沒有取得完整各頁資料就不推斷全市「只有展示本」或「全部借出」。
+- 實際 WebPAC **HTML 原始碼仍未取得**；透過網頁檢索可見的表格欄位和資料不能取代真實 DOM 結構測試。離線程式已在 GitHub Actions 通過 13 個解析測試和 17 個流通判斷測試。
