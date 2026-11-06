@@ -103,6 +103,22 @@ def parse_webpac_html(html: str, isbn: str, captured_at: str = "") -> dict:
     page_match = ISBN_ON_PAGE.search(visible_text)
     count_match = re.search(r"館藏\s*[（(]\s*([0-9]+)\s*[）)]", visible_text)
     reported_count = int(count_match.group(1)) if count_match else None
+    # Current page uses <a class="selected">1</a>; last page link
+    # includes contentlistcurrent_page=8. These are navigation hints only:
+    # we DO NOT fetch page links.
+    current_match = re.search(
+        r'<a\b[^>]*class=["\'][^"\']*\bselected\b[^"\']*["\'][^>]*>\s*([0-9]+)\s*</a>',
+        html, re.I,
+    )
+    page_number = int(current_match.group(1)) if current_match else None
+    last_match = re.search(
+        r'<a\b[^>]*class=["\'][^"\']*\blast\b[^"\']*["\'][^>]*>',
+        html, re.I,
+    )
+    total_pages = None
+    if last_match:
+        total_match = re.search(r'contentlistcurrent_page=([0-9]+)', last_match.group(0))
+        total_pages = int(total_match.group(1)) if total_match else None
     page_isbn = re.sub(r"[^0-9Xx]", "", page_match.group(1)).upper() if page_match else None
     clean_isbn = re.sub(r"[^0-9Xx]", "", isbn).upper()
     if not re.fullmatch(r"(?:\d{13}|\d{9}[\dX])", clean_isbn):
@@ -162,6 +178,8 @@ def parse_webpac_html(html: str, isbn: str, captured_at: str = "") -> dict:
         "source": "manual-html-snapshot",
         "complete": False,
         "reportedHoldingsCount": reported_count,
+        "currentPageNumber": page_number,
+        "totalPagesReported": total_pages,
         "parsedPageCopyCount": len(copies),
         "paginationLikely": reported_count is not None and reported_count > len(copies),
         "notes": "離線頁面觀察；可能只有部分館藏頁數，不能代表全市完整或即時館藏。",
