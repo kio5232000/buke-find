@@ -99,7 +99,10 @@ def get_header_indices(row):
 
 def parse_webpac_html(html: str, isbn: str, captured_at: str = "") -> dict:
     # The page ISBN is checked where possible, so unrelated books aren't merged.
-    page_match = ISBN_ON_PAGE.search(re.sub(r"<[^>]+>", " ", html))
+    visible_text = re.sub(r"<[^>]+>", " ", html)
+    page_match = ISBN_ON_PAGE.search(visible_text)
+    count_match = re.search(r"館藏\s*[（(]\s*([0-9]+)\s*[）)]", visible_text)
+    reported_count = int(count_match.group(1)) if count_match else None
     page_isbn = re.sub(r"[^0-9Xx]", "", page_match.group(1)).upper() if page_match else None
     clean_isbn = re.sub(r"[^0-9Xx]", "", isbn).upper()
     if not re.fullmatch(r"(?:\d{13}|\d{9}[\dX])", clean_isbn):
@@ -158,6 +161,9 @@ def parse_webpac_html(html: str, isbn: str, captured_at: str = "") -> dict:
         "checkedAt": captured_at,
         "source": "manual-html-snapshot",
         "complete": False,
+        "reportedHoldingsCount": reported_count,
+        "parsedPageCopyCount": len(copies),
+        "paginationLikely": reported_count is not None and reported_count > len(copies),
         "notes": "離線頁面觀察；可能只有部分館藏頁數，不能代表全市完整或即時館藏。",
         "pageIsbnVerified": bool(page_isbn),
         "copies": copies,
