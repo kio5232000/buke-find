@@ -1,5 +1,7 @@
 """Offline parser tests with SYNTHETIC HTML based on public column names."""
 import unittest
+import json
+from pathlib import Path
 from parse_webpac_snapshot import parse_webpac_html
 
 HEADER = """<tr><th>條碼號</th><th>典藏館</th><th>目前所在館</th>
@@ -19,6 +21,28 @@ def page(*rows, isbn="9789861615929"):
 
 
 class ParserTest(unittest.TestCase):
+    def test_public_catalog_observations_reconstructed_as_table(self):
+        fixture_path = Path(__file__).parent / "fixtures" / "catalog_public_observation.json"
+        sample = json.loads(fixture_path.read_text(encoding="utf-8"))
+        observed_rows = [
+            row(item["barcode"], item["homeLibrary"], item["currentLibrary"],
+                item["status"], typ=item["dataType"], queue=str(item["reservationCount"]))
+            for item in sample["rows"]
+        ]
+        # DOM is reconstructed from publicly rendered rows; NOT a captured HTML original.
+        html = page(*observed_rows, isbn=sample["isbn"])
+        html = html.replace("<table>" + HEADER,
+            "<h3>館藏(" + str(sample["reportedHoldingsCount"]) + ")</h3><table>" + HEADER)
+        parsed = parse_webpac_html(html, sample["isbn"])
+        self.assertEqual(parsed["reportedHoldingsCount"], 27)
+        self.assertEqual(parsed["parsedPageCopyCount"], 5)
+        self.assertTrue(parsed["paginationLikely"])
+        self.assertFalse(parsed["complete"])
+        self.assertIs(parsed["copies"][1]["borrowable"], True) # 展覽用書(可外借)
+        self.assertIs(parsed["copies"][2]["borrowable"], False) # 展覽用書(不外借)
+        self.assertIsNone(parsed["copies"][4]["borrowable"])    # 閉館但在架 → 不推定可借
+
+
     def test_exhibition_not_borrowable(self):
         d = parse_webpac_html(page(row("TPL0405647","新總館B1兒童書區",
             "新總館B1兒童書區","展覽用書(不外借)",note="布可星球")),
