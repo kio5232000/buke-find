@@ -68,6 +68,8 @@ const get = (copies, overrides={}) => summarizeHoldings({...metadata, isbn:'9789
  assert.equal(classifyCopy({status:'在架',borrowable:false}).availableToBorrow,false);
  assert.equal(classifyCopy({status:'尋書未獲',borrowable:true}).availableToBorrow,false);
  assert.equal(classifyCopy({status:'在架',borrowable:true,shelfLocation:'限館內閱覽'}).availableToBorrow,false);
+ assert.equal(classifyCopy({status:'在架',borrowable:true,circulationPolicy:'展覽用書(不外借)'}).availableToBorrow,false);
+ assert.equal(classifyCopy({status:'在架',borrowable:true,dataType:'中文參考書'}).availableToBorrow,false);
 }
 {
  const r=get([]);
