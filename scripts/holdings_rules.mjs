@@ -4,7 +4,7 @@
 // { isbn, checkedAt, source:'authorized-api', copies:[
 //   {barcode, homeLibrary, currentLibrary, shelfLocation, status:'在架', borrowable:true, reservationCount:0}
 // ] }
-const NON_CIRCULATING = /展覽用書|不外借|限館內閱覽|僅限館內|館內閱覽|參考資料區|參考書區/;
+const NON_CIRCULATING = /展覽用書|不外借|限館內閱覽|僅限館內|館內閱覽|參考資料區|參考書區|中文參考書|參考工具書/;
 const ON_SHELF = /^在架(?:\s|$|[（(])/;
 
 export function classifyCopy(copy) {
@@ -12,7 +12,7 @@ export function classifyCopy(copy) {
   const shelfLocation = String(copy?.shelfLocation ?? '').trim();
   const homeLibrary = String(copy?.homeLibrary ?? '').trim();
   const currentLibrary = String(copy?.currentLibrary ?? '').trim();
-  const restriction = NON_CIRCULATING.test([status, shelfLocation, homeLibrary, currentLibrary].join(' '));
+  const restriction = NON_CIRCULATING.test([status, shelfLocation, homeLibrary, currentLibrary, copy?.circulationPolicy ?? '', copy?.dataType ?? ''].join(' '));
   const explicitEligibility = copy?.borrowable === true || copy?.borrowable === false;
   const canBorrow = !restriction && copy?.borrowable === true;
   const onShelf = ON_SHELF.test(status);
