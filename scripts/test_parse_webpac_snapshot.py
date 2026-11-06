@@ -29,6 +29,18 @@ class ParserTest(unittest.TestCase):
         self.assertEqual(d["source"], "manual-html-snapshot")
         self.assertFalse(d["complete"])
 
+    def test_exhibition_can_be_borrowable(self):
+        d = parse_webpac_html(page(row("PH0098062","白河年度新書區",
+            "白河年度新書區","展覽用書(可外借)",typ="中文書")), "9789861615929")
+        self.assertIs(d["copies"][0]["borrowable"], True)
+        self.assertEqual(d["copies"][0]["status"], "展覽用書(可外借)")
+
+    def test_exhibition_borrowable_in_closed_branch(self):
+        d = parse_webpac_html(page(row("TC0084111","左鎮年度新書區(閉館整修)",
+            "左鎮年度新書區(閉館整修)","展覽用書(可外借)")), "9789861615929")
+        self.assertIs(d["copies"][0]["borrowable"], True)
+        self.assertIn("閉館整修", d["copies"][0]["currentLibrary"])
+
     def test_borrowed_and_exhibition_mixed(self):
         d = parse_webpac_html(page(
             row("TPL0405647","新總館B1兒童書區","新總館B1兒童書區","展覽用書(不外借)"),
