@@ -76,4 +76,30 @@ const get = (copies, overrides={}) => summarizeHoldings({...metadata, isbn:'9789
  assert.equal(r.observedStatus,'unknown');
  assert.equal(r.availableBorrowableCopies,0);
 }
-console.log('PASS: 11 verified test scenarios; no live catalog API was used.');
+{
+ const c=classifyCopy({status:'展覽用書(可外借)',borrowable:true,homeLibrary:'白河年度新書區',currentLibrary:'白河年度新書區'});
+ assert.equal(c.nonCirculating,false);
+ assert.equal(c.canBorrow,true);
+ assert.equal(c.availableToBorrow,true);
+}
+{
+ const c=classifyCopy({status:'展覽用書(可外借)',borrowable:true,homeLibrary:'左鎮年度新書區(閉館整修)',currentLibrary:'左鎮年度新書區(閉館整修)'});
+ assert.equal(c.canBorrow,true);
+ assert.equal(c.availableToBorrow,false);
+ assert.equal(c.accessUnavailable,true);
+}
+{
+ const r=get([exhibition],{complete:false,source:'manual-html-snapshot'});
+ assert.equal(r.observedStatus,'unknown'); // 單頁不足以證明全市只有展示本
+ assert.equal(r.inLibraryReadingCopies,1);
+ assert.equal(r.liveVerified,false);
+}
+{
+ const r=get([borrowable('借出 2026/11/29',2)],{complete:false,source:'manual-html-snapshot'});
+ assert.equal(r.observedStatus,'unknown'); // 單頁不足以證明全市都借出
+}
+{
+ const r=get([borrowable('在架',0)],{complete:false,source:'authorized-api'});
+ assert.equal(r.liveVerified,false); // API 不完整也不能標示即時完整
+}
+console.log('PASS: 16 verified test scenarios; no live catalog API was used.');
