@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { classifyCopy, summarizeHoldings } from './holdings_rules.mjs';
+import { readFileSync } from 'node:fs';
 
 const now = new Date('2026-11-05T08:00:00Z');
 const metadata = { source:'authorized-api', checkedAt:'2026-11-05T07:55:00Z' };
@@ -102,4 +103,18 @@ const get = (copies, overrides={}) => summarizeHoldings({...metadata, isbn:'9789
  const r=get([borrowable('在架',0)],{complete:false,source:'authorized-api'});
  assert.equal(r.liveVerified,false); // API 不完整也不能標示即時完整
 }
-console.log('PASS: 16 verified test scenarios; no live catalog API was used.');
+{
+ const sample=JSON.parse(readFileSync(new URL('./fixtures/catalog_public_observation.json',import.meta.url),'utf8'));
+ const copies=sample.rows.map(r=>({ ...r,borrowable:
+   r.status==='展覽用書(可外借)'?true:
+   r.status==='展覽用書(不外借)'?false:
+   /^借出/.test(r.status)?true:null
+ }));
+ const result=get(copies,{source:'manual-html-snapshot',complete:false});
+ assert.equal(result.liveVerified,false);
+ assert.equal(result.availableBorrowableCopies,0); // 可外借展示本位於閉館整修的館
+ assert.equal(result.inLibraryReadingCopies,1);
+ assert.equal(result.observedStatus,'unknown'); // 只能看見公開頁面一部分，不下全市結論
+ assert.equal(result.unverifiedCopyCount,2); // 一般「在架」仍待確認
+}
+console.log('PASS: 17 verified test scenarios; public-page observation is not live catalog data.');
