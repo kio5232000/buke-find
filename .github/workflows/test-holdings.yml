@@ -6,6 +6,8 @@ on:
       - 'scripts/holdings_rules.test.mjs'
       - 'scripts/parse_webpac_snapshot.py'
       - 'scripts/test_parse_webpac_snapshot.py'
+      - 'scripts/test_frontend_v3.mjs'
+      - 'index.html'
       - '.github/workflows/test-holdings.yml'
   workflow_dispatch:
 jobs:
@@ -18,5 +20,7 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/holdings_rules.test.mjs
+      - name: Smoke test API-free V3 interface
+        run: node scripts/test_frontend_v3.mjs
       - name: Test offline WebPAC HTML parser
         run: python -m unittest discover -s scripts -p 'test_parse_webpac_snapshot.py' -v
