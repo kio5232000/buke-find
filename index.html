@@ -128,7 +128,8 @@ function render(){
  }
  const n=show.length;
  $('resultCount').textContent=state.tab==='discover'?`本次挑選 ${n} 本尚未標記已挖掘的書 · 可點「再換一批書」`:`共 ${n} 本符合條件 · 已載入 ${books().length} 本布可書目（非即時館藏）`;
- $('cards').innerHTML=show.slice(0,state.limit).map((b,i)=>card(b,i)).join('') || '<div class="empty"><div class="big">📚</div><strong>這個條件下還沒有書籍</strong><p>換個分類，或匯入官方完整書單試試看。</p></div>';
+ const emptyText=state.tab==='saved'?'還沒收藏書籍，先到「找布可書」點 ♡ 收藏吧':state.tab==='history'?'尚未建立查詢紀錄，請先找一本書，點「記下我查到的狀態」':state.tab==='discover'?'這個條件下沒有尚未挖掘的書，可改選年級或清除搜尋':'這個條件下還沒有書籍，試著清除搜尋或切換年級';
+ $('cards').innerHTML=show.slice(0,state.limit).map((b,i)=>card(b,i)).join('') || `<div class="empty"><div class="big">📚</div><strong>${emptyText}</strong></div>`;
  $('moreBtn').hidden=n<=state.limit;
 }
 function card(b,i){const h=hash(b.isbn||b.title),c=colors[h%colors.length],s=b.s,st=label(s),saved=progress[b.isbn]||'',queue=s.queue!==null&&s.queue!==undefined?`${s.queue} 人候補`:'候補人數待查';const isE=state.tab==='ebook',isDiscover=state.tab==='discover';
