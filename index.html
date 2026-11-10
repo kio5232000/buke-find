@@ -64,6 +64,7 @@ const state={grade:load('buke-grade','low'),tab:'available',demo:false,term:'',l
 const colors=[['#f2d5a2','#624a29'],['#a5d9cc','#205d55'],['#b7d3e9','#315778'],['#f2b7b9','#7e4045'],['#ced9ad','#536b32'],['#d9c4ec','#5b4281'],['#f6d7b4','#955c35']];
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function hash(s){let v=0;for(let i=0;i<s.length;i++)v=(v*31+s.charCodeAt(i))>>>0;return v}
+function pickRank(isbn,seed){let v=(hash(String(isbn))^Math.imul(seed,0x9e3779b1))>>>0;v=Math.imul(v^(v>>>16),0x7feb352d);v=Math.imul(v^(v>>>15),0x846ca68b);return (v^(v>>>16))>>>0}
 function demoStatus(book){const h=hash(book.isbn),k=h%11;return {status:k<5?'available':k<8?'elsewhere':'loaned',queue: k<8?0:(h%6+1),ebook:h%5===0?'yes':'no',checked:'示範'};}
 function realStatus(book){
  const r=records[book.isbn];
@@ -117,7 +118,7 @@ function render(){
   show.sort((a,b)=>rating(a.s)-rating(b.s)||a.title.localeCompare(b.title,'zh-Hant'));
  }else if(state.tab==='discover'){
   show=show.filter(b=>progress[b.isbn]!=='done');
-  show.sort((a,b)=>hash(state.discoverySeed+':'+a.isbn)-hash(state.discoverySeed+':'+b.isbn));
+  show.sort((a,b)=>pickRank(a.isbn,state.discoverySeed)-pickRank(b.isbn,state.discoverySeed));
   show=show.slice(0,12);
  }else if(state.tab==='ebook'){
   show.sort((a,b)=>(a.s.ebook==='yes'?0:1)-(b.s.ebook==='yes'?0:1));
