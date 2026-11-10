@@ -59,7 +59,7 @@ const next=element('cards').innerHTML;
 assert.notEqual(first,next,'Try another set changes the suggested books');
 
 vm.runInContext("state.tab='history';render()",context);
-assert.match(element('cards').innerHTML,/這個條件下還沒有書籍/);
+assert.match(element('cards').innerHTML,/尚未建立查詢紀錄/);
 vm.runInContext("progress['9789865664817']='wish';state.tab='saved';render()",context);
 assert.match(element('cards').innerHTML,/米爺爺學認字/);
 assert.match(element('progressSummary').textContent,/想讀 1 本/);
